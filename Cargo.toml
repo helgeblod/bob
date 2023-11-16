@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.4.8", features = ["derive"] }
+duct = "0.13.6"
+pathsearch = "0.2.0"

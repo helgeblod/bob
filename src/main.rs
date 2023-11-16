@@ -1,10 +1,11 @@
 extern crate clap;
 
-use std::process::Command;
 use clap::{Parser, Subcommand};
+use duct::cmd;
+use pathsearch::find_executable_in_path;
 
 #[derive(Parser)]
-#[command(author, version, about="Build command shortcuts", long_about = "Utility for running build commands for different build systems")]
+#[command(author, version, about = "Build command shortcuts", long_about = "Utility for running build commands for different build systems")]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
@@ -44,13 +45,12 @@ fn main() {
             exec_test(languages);
         }
     }
-
 }
 
 fn exec_test(languages: Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            system_run(&language.heading, &language.test_command);
+            system_run(&language.heading, &language.main_command, &language.test_command, language.lookup_full_path);
             break;
         }
     }
@@ -60,7 +60,7 @@ fn exec_test(languages: Vec<Language>) {
 fn exec_run(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            system_run(&language.heading, &language.run_command);
+            system_run(&language.heading, &language.main_command, &language.run_command, language.lookup_full_path);
             break;
         }
     }
@@ -69,7 +69,7 @@ fn exec_run(languages: &Vec<Language>) {
 fn exec_clean(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            system_run(&language.heading, &language.clean_command);
+            system_run(&language.heading, &language.main_command, &language.clean_command, language.lookup_full_path);
             break;
         }
     }
@@ -78,16 +78,28 @@ fn exec_clean(languages: &Vec<Language>) {
 fn exec_build(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            system_run(&language.heading, &language.build_command);
+            system_run(&language.heading, &language.main_command, &language.build_command, language.lookup_full_path);
             break;
         }
     }
 }
 
-fn system_run(heading: &String, command: &String) {
-    println!("{} ({})", heading, command.clone());
-    Command::new(command.as_str()).spawn().expect("😿 Failed to run command");
-
+fn system_run(heading: &String, command: &String, args: &String, detect_path: bool) {
+    // Search path for command
+    println!("{} {} {}", heading, command.clone(), args.clone());
+    if detect_path {
+        match find_executable_in_path(&command.clone()) {
+            None => {
+                println!("Command not found: {:}", command.clone());
+                return;
+            }
+            Some(exe) => {
+                cmd!(exe.to_str().expect("Unable to unwrap executable"), args).run().expect("Failed to execute command");
+            }
+        };
+    } else {
+        cmd!(command, args).run().expect("Failed to execute command");
+    };
 }
 
 fn add_languages() -> Vec<Language> {
@@ -96,52 +108,62 @@ fn add_languages() -> Vec<Language> {
     // Rust
     languages.push(Language {
         detect_file: "Cargo.toml".to_string(),
-        build_command: "cargo build".to_string(),
-        clean_command: "cargo clean".to_string(),
-        run_command: "cargo run".to_string(),
-        test_command: "cargo test".to_string(),
+        main_command: "cargo".to_string(),
+        build_command: "build".to_string(),
+        clean_command: "clean".to_string(),
+        run_command: "run".to_string(),
+        test_command: "test".to_string(),
         heading: "🦀 Rust".to_string(),
+        lookup_full_path: true,
     });
 
     // If BOB_YARN is set, add yarn
     if std::env::var("BOB_USE_YARN").is_ok() {
         languages.push(Language {
             detect_file: "package.json".to_string(),
-            build_command: "yarn build".to_string(),
-            clean_command: "yarn clean".to_string(),
-            run_command: "yarn start".to_string(),
-            test_command: "yarn test".to_string(),
+            main_command: "yarn".to_string(),
+            build_command: "build".to_string(),
+            clean_command: "clean".to_string(),
+            run_command: "start".to_string(),
+            test_command: "test".to_string(),
             heading: "🧶 Yarn".to_string(),
+            lookup_full_path: true,
         });
     } else {
         languages.push(Language {
             detect_file: "package.json".to_string(),
-            build_command: "npm run build".to_string(),
-            clean_command: "npm run clean".to_string(),
-            run_command: "npm run start".to_string(),
-            test_command: "npm run test".to_string(),
+            main_command: "npm".to_string(),
+            build_command: "run build".to_string(),
+            clean_command: "run clean".to_string(),
+            run_command: "run start".to_string(),
+            test_command: "run test".to_string(),
             heading: "📦 NPM".to_string(),
+            lookup_full_path: true,
         });
     }
 
     // If gradle wrapper is present, add gradle
     languages.push(Language {
         detect_file: "gradlew".to_string(),
-        build_command: "./gradlew build".to_string(),
-        clean_command: "./gradlew clean".to_string(),
-        run_command: "./gradlew run".to_string(),
-        test_command: "./gradlew test".to_string(),
+        main_command: "./gradlew".to_string(),
+        build_command: "build".to_string(),
+        clean_command: "clean".to_string(),
+        run_command: "run".to_string(),
+        test_command: "test".to_string(),
         heading: "🎁 Gradle Wrapper".to_string(),
+        lookup_full_path: false,
     });
 
     // gradle build
     languages.push(Language {
         detect_file: "build.gradle.kts".to_string(),
-        build_command: "gradle build".to_string(),
-        clean_command: "gradle clean".to_string(),
-        run_command: "gradle run".to_string(),
-        test_command: "gradle test".to_string(),
+        main_command: "gradle".to_string(),
+        build_command: "build".to_string(),
+        clean_command: "clean".to_string(),
+        run_command: "run".to_string(),
+        test_command: "test".to_string(),
         heading: "🤖 Gradle".to_string(),
+        lookup_full_path: true,
     });
 
     languages
@@ -149,11 +171,13 @@ fn add_languages() -> Vec<Language> {
 
 struct Language {
     detect_file: String,
+    main_command: String,
     build_command: String,
     clean_command: String,
     run_command: String,
     test_command: String,
     heading: String,
+    lookup_full_path: bool,
 }
 
 trait LanguageDetector {
