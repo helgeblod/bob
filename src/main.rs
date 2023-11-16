@@ -1,5 +1,6 @@
 extern crate clap;
 
+use std::process::Command;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -49,16 +50,17 @@ fn main() {
 fn exec_test(languages: Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            println!("{} ({})", language.heading, language.test_command);
+            system_run(&language.heading, &language.test_command);
             break;
         }
     }
 }
 
+
 fn exec_run(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            println!("{} ({})", language.heading, language.run_command);
+            system_run(&language.heading, &language.run_command);
             break;
         }
     }
@@ -67,7 +69,7 @@ fn exec_run(languages: &Vec<Language>) {
 fn exec_clean(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            println!("{} ({})", language.heading, language.clean_command);
+            system_run(&language.heading, &language.clean_command);
             break;
         }
     }
@@ -76,10 +78,16 @@ fn exec_clean(languages: &Vec<Language>) {
 fn exec_build(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            println!("{} ({})", language.heading, language.build_command);
+            system_run(&language.heading, &language.build_command);
             break;
         }
     }
+}
+
+fn system_run(heading: &String, command: &String) {
+    println!("{} ({})", heading, command.clone());
+    Command::new(command.as_str()).spawn().expect("😿 Failed to run command");
+
 }
 
 fn add_languages() -> Vec<Language> {
