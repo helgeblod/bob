@@ -86,7 +86,7 @@ fn exec_build(languages: &Vec<Language>) {
 
 fn system_run(heading: &String, command: &String, args: &String, detect_path: bool) {
     // Search path for command
-    println!("{} {} {}", heading, command.clone(), args.clone());
+    println!("{} ⚙️ '{} {}'", heading, command.clone(), args.clone());
     if detect_path {
         match find_executable_in_path(&command.clone()) {
             None => {
