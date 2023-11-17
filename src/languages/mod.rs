@@ -1,6 +1,30 @@
 pub fn add_languages() -> Vec<Language> {
     let mut languages: Vec<Language> = vec![];
 
+    // justfile for custom builds
+    languages.push(Language {
+        detect_file: ".justfile".to_string(),
+        main_command: "just".to_string(),
+        build_command: "build".to_string(),
+        clean_command: "clean".to_string(),
+        run_command: "run".to_string(),
+        test_command: "test".to_string(),
+        heading: "🤖Justfile".to_string(),
+        lookup_full_path: true,
+    });
+
+    // justfile for custom builds
+    languages.push(Language {
+        detect_file: ".justfile".to_string(),
+        main_command: "just".to_string(),
+        build_command: "build".to_string(),
+        clean_command: "clean".to_string(),
+        run_command: "run".to_string(),
+        test_command: "test".to_string(),
+        heading: "🍥Makefile".to_string(),
+        lookup_full_path: true,
+    });
+
     // Rust
     languages.push(Language {
         detect_file: "Cargo.toml".to_string(),
@@ -9,7 +33,7 @@ pub fn add_languages() -> Vec<Language> {
         clean_command: "clean".to_string(),
         run_command: "run".to_string(),
         test_command: "test".to_string(),
-        heading: "🦀 Rust".to_string(),
+        heading: "🦀Rust".to_string(),
         lookup_full_path: true,
     });
 
@@ -22,7 +46,7 @@ pub fn add_languages() -> Vec<Language> {
             clean_command: "clean".to_string(),
             run_command: "start".to_string(),
             test_command: "test".to_string(),
-            heading: "🧶 Yarn".to_string(),
+            heading: "🧶Yarn".to_string(),
             lookup_full_path: true,
         });
     } else {
@@ -33,7 +57,7 @@ pub fn add_languages() -> Vec<Language> {
             clean_command: "run clean".to_string(),
             run_command: "run start".to_string(),
             test_command: "run test".to_string(),
-            heading: "📦 NPM".to_string(),
+            heading: "📦NPM".to_string(),
             lookup_full_path: true,
         });
     }
@@ -46,7 +70,7 @@ pub fn add_languages() -> Vec<Language> {
         clean_command: "clean".to_string(),
         run_command: "run".to_string(),
         test_command: "test".to_string(),
-        heading: "🎁 Gradle Wrapper".to_string(),
+        heading: "🎁Gradle Wrapper".to_string(),
         lookup_full_path: false,
     });
 
@@ -58,9 +82,11 @@ pub fn add_languages() -> Vec<Language> {
         clean_command: "clean".to_string(),
         run_command: "run".to_string(),
         test_command: "test".to_string(),
-        heading: "🤖 Gradle".to_string(),
+        heading: "🔩Gradle".to_string(),
         lookup_full_path: true,
     });
+
+
 
     languages
 }
