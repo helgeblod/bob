@@ -5,7 +5,7 @@ use crate::languages::{Language, LanguageDetector};
 pub fn exec_test(languages: Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            run_cmd(&language.heading, &language.main_command, &language.test_command, language.lookup_full_path);
+            run_cmd(language.heading, language.main_command, language.test_command, language.lookup_full_path);
             break;
         }
     }
@@ -15,7 +15,7 @@ pub fn exec_test(languages: Vec<Language>) {
 pub fn exec_run(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            run_cmd(&language.heading, &language.main_command, &language.run_command, language.lookup_full_path);
+            run_cmd(language.heading, language.main_command, language.run_command, language.lookup_full_path);
             break;
         }
     }
@@ -24,7 +24,7 @@ pub fn exec_run(languages: &Vec<Language>) {
 pub fn exec_clean(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            run_cmd(&language.heading, &language.main_command, &language.clean_command, language.lookup_full_path);
+            run_cmd(language.heading, language.main_command, language.clean_command, language.lookup_full_path);
             break;
         }
     }
@@ -33,19 +33,19 @@ pub fn exec_clean(languages: &Vec<Language>) {
 pub fn exec_build(languages: &Vec<Language>) {
     for language in languages.iter() {
         if language.current_language() {
-            run_cmd(&language.heading, &language.main_command, &language.build_command, language.lookup_full_path);
+            run_cmd(language.heading, language.main_command, language.build_command, language.lookup_full_path);
             break;
         }
     }
 }
 
-fn run_cmd(heading: &String, command: &String, args: &String, detect_path: bool) {
+fn run_cmd(heading: &str, command: &str, args: &str, detect_path: bool) {
     // Search path for command
-    println!("{} ⚙️ '{} {}'", heading, command.clone(), args.clone());
+    println!("{} ⚙️ '{} {}'", heading, command, args);
     if detect_path {
-        match find_executable_in_path(&command.clone()) {
+        match find_executable_in_path(&command) {
             None => {
-                println!("Command not found: {:}", command.clone());
+                println!("Command not found: {:}", command);
                 return;
             }
             Some(exe) => {
