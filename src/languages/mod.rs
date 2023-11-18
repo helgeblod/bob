@@ -35,7 +35,7 @@ pub fn add_languages() -> Vec<Language> {
         clean_command: "clean",
         run_command: "run",
         test_command: "test",
-        install_command: Some("install"),
+        install_command: Some("install --path ."),
         heading: "🦀 Rust",
         lookup_full_path: true,
     });
