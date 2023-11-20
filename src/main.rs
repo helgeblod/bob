@@ -2,11 +2,16 @@ extern crate clap;
 
 use clap::{Parser, Subcommand};
 
-mod languages;
 mod cmd;
+mod languages;
 
 #[derive(Parser)]
-#[command(author, version, about = "Build command shortcuts", long_about = "Utility for running build commands for different build systems")]
+#[command(
+    author,
+    version,
+    about = "Build command shortcuts",
+    long_about = "Utility for running build commands for different build systems"
+)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
@@ -23,6 +28,9 @@ enum Commands {
 
     /// Run code 🚀
     Run {},
+
+    /// Install packages or binary 🚚
+    Install {},
 
     /// Run tests 🧪
     Test {},
@@ -41,6 +49,9 @@ fn main() {
         }
         Commands::Run {} => {
             cmd::exec_run(&languages);
+        }
+        Commands::Install {} => {
+            cmd::exec_install(&languages);
         }
         Commands::Test {} => {
             cmd::exec_test(languages);
